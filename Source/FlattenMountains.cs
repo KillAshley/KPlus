@@ -3,58 +3,31 @@
  * All Rights Reserved - Thomas P. and KillAshley
  */
 
+using Kopernicus.Configuration;
+using Kopernicus.Configuration.ModLoader;
 using UnityEngine;
 
-namespace Kopernicus
+namespace KerbolPlus
 {
-    namespace Configuration
+    public class PQSMod_FlattenMountains : PQSMod
     {
-        namespace ModLoader
+        public double altitude = 0;
+        public override void OnVertexBuildHeight(PQS.VertexBuildData data)
         {
-            public class PQSMod_FlattenMountains : PQSMod
-            {
-                public double altitude = 0;
+            if (data.vertHeight > (altitude + sphere.radius))
+                data.vertHeight = sphere.radius + altitude;
+        }
+    }
 
-                public override void OnVertexBuildHeight(PQS.VertexBuildData data)
-                {
-                    if (data.vertHeight > (altitude + sphere.radius))
-                        data.vertHeight = sphere.radius + altitude;
-                }
-            }
-
-            [RequireConfigType(ConfigType.Node)]
-            public class FlattenMountains : ModLoader, IParserEventSubscriber
-            {
-                // Actual PQS mod we are loading
-                private PQSMod_FlattenMountains _mod;
-
-                // The altitude for the flatten
-                [ParserTarget("altitude", optional = true)]
-                private NumericParser<double> altitude
-                {
-                    set { _mod.altitude = value.value; }
-                }
-
-                void IParserEventSubscriber.Apply(ConfigNode node) { }
-
-                void IParserEventSubscriber.PostApply(ConfigNode node) { }
-
-                public FlattenMountains()
-                {
-                    // Create the base mod
-                    GameObject modObject = new GameObject("FlattenMountains");
-                    modObject.transform.parent = Utility.Deactivator;
-                    _mod = modObject.AddComponent<PQSMod_FlattenMountains>();
-                    base.mod = _mod;
-                }
-
-                public FlattenMountains(PQSMod template)
-                {
-                    _mod = template as PQSMod_FlattenMountains;
-                    _mod.transform.parent = Utility.Deactivator;
-                    base.mod = _mod;
-                }
-            }
+    [RequireConfigType(ConfigType.Node)]
+    public class FlattenMountains : ModLoader<PQSMod_FlattenMountains>
+    {
+        // The altitude for the flatten
+        [ParserTarget("altitude", optional = true)]
+        private NumericParser<double> altitude
+        {
+            get { return mod.altitude; }
+            set { mod.altitude = value; }
         }
     }
 }
